@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate, useParams } from 'react-router-dom';
-import { Building, Users, Settings, ChevronLeft, ShieldCheck, Menu, X } from 'lucide-react';
+import { Building, Users, Settings, ChevronLeft, ShieldCheck, Menu, X, List, Layers } from 'lucide-react';
 import { Role, Contract, ProcessConfig, Event, ResponseTemplate } from './types';
 import { initialContracts, initialConfigs, initialTemplates } from './mockData';
 import Dashboard from './components/Dashboard';
 import ContractPortal from './components/ContractPortal';
 import AdminBackoffice from './components/AdminBackoffice';
 import ListagemGeral from './components/ListagemGeral';
+import GestaoFilas from './components/GestaoFilas';
 
 export default function App() {
   const [role, setRole] = useState<Role>('CLIENTE');
@@ -111,9 +112,18 @@ export default function App() {
                     navigate('/listagem-geral');
                     setIsMenuOpen(false);
                   }}
-                  className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors ${location.pathname === '/listagem-geral' ? 'text-primary font-medium bg-primary-light/20' : 'text-gray-700'}`}
+                  className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors flex items-center gap-2 ${location.pathname === '/listagem-geral' ? 'text-primary font-medium bg-primary-light/20' : 'text-gray-700'}`}
                 >
-                  Listagem Geral
+                  <List size={16} /> Listagem Geral
+                </button>
+                <button
+                  onClick={() => {
+                    navigate('/gestao-filas');
+                    setIsMenuOpen(false);
+                  }}
+                  className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors flex items-center gap-2 ${location.pathname === '/gestao-filas' ? 'text-primary font-medium bg-primary-light/20' : 'text-gray-700'}`}
+                >
+                  <Layers size={16} /> Gestão de Filas
                 </button>
                 {location.pathname.startsWith('/contract/') && (
                   <button
@@ -174,7 +184,7 @@ export default function App() {
       </header>
 
       {/* Main Content */}
-      <main className={`flex-1 p-4 md:p-8 mx-auto w-full ${location.pathname === '/listagem-geral' ? 'max-w-[1600px]' : 'max-w-7xl'}`}>
+      <main className={`flex-1 p-4 md:p-8 mx-auto w-full ${(location.pathname === '/listagem-geral' || location.pathname === '/gestao-filas') ? 'max-w-[1600px]' : 'max-w-7xl'}`}>
         {location.pathname.startsWith('/contract/') && (
           <button onClick={() => navigate('/dashboard')} className="flex items-center gap-1 text-primary font-medium mb-6 hover:underline">
             <ChevronLeft size={20} /> Voltar ao Dashboard
@@ -222,6 +232,7 @@ export default function App() {
           } />
 
           <Route path="/listagem-geral" element={<ListagemGeral />} />
+          <Route path="/gestao-filas" element={<GestaoFilas />} />
         </Routes>
       </main>
     </div>

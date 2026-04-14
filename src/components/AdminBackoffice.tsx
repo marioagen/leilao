@@ -12,7 +12,7 @@ interface Props {
 }
 
 export default function AdminBackoffice({ configs, templates, onUpdateConfig, onCreateConfig, onDeleteConfig, onUpdateTemplate }: Props) {
-  const [tab, setTab] = useState<'PROCESS' | 'TEMPLATES'>('PROCESS');
+  const [tab, setTab] = useState<'PROCESS' | 'TEMPLATES'>('TEMPLATES');
   const [activeConfig, setActiveConfig] = useState<ProcessConfig | null>(configs[0] || null);
   const [activeTemplate, setActiveTemplate] = useState(templates[0]);
   const [isCreatingConfig, setIsCreatingConfig] = useState(false);
