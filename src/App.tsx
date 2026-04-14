@@ -10,11 +10,16 @@ import ListagemGeral from './components/ListagemGeral';
 import GestaoFilas from './components/GestaoFilas';
 
 export default function App() {
-  const [role, setRole] = useState<Role>('CLIENTE');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   
+  const pathParts = location.pathname.split('/');
+  const urlRole = pathParts[1]?.toUpperCase() as Role;
+  const validRoles: Role[] = ['CLIENTE', 'ANALISTA', 'GESTOR', 'ADMIN'];
+  const role = validRoles.includes(urlRole) ? urlRole : 'CLIENTE';
+  const rolePath = role.toLowerCase();
+
   const [contracts, setContracts] = useState<Contract[]>(initialContracts);
   const [configs, setConfigs] = useState<ProcessConfig[]>(initialConfigs);
   const [templates, setTemplates] = useState<ResponseTemplate[]>(initialTemplates);
@@ -100,32 +105,32 @@ export default function App() {
               <div className="absolute top-full left-0 mt-2 w-56 bg-white border border-border-light rounded-lg shadow-lg py-2 z-50">
                 <button
                   onClick={() => {
-                    navigate('/dashboard');
+                    navigate(`/${rolePath}/dashboard`);
                     setIsMenuOpen(false);
                   }}
-                  className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors ${location.pathname === '/dashboard' ? 'text-primary font-medium bg-primary-light/20' : 'text-gray-700'}`}
+                  className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors ${location.pathname.includes('/dashboard') ? 'text-primary font-medium bg-primary-light/20' : 'text-gray-700'}`}
                 >
                   Dashboard
                 </button>
                 <button
                   onClick={() => {
-                    navigate('/listagem-geral');
+                    navigate(`/${rolePath}/listagem-geral`);
                     setIsMenuOpen(false);
                   }}
-                  className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors flex items-center gap-2 ${location.pathname === '/listagem-geral' ? 'text-primary font-medium bg-primary-light/20' : 'text-gray-700'}`}
+                  className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors flex items-center gap-2 ${location.pathname.includes('/listagem-geral') ? 'text-primary font-medium bg-primary-light/20' : 'text-gray-700'}`}
                 >
                   <List size={16} /> Listagem Geral
                 </button>
                 <button
                   onClick={() => {
-                    navigate('/gestao-filas');
+                    navigate(`/${rolePath}/gestao-filas`);
                     setIsMenuOpen(false);
                   }}
-                  className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors flex items-center gap-2 ${location.pathname === '/gestao-filas' ? 'text-primary font-medium bg-primary-light/20' : 'text-gray-700'}`}
+                  className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors flex items-center gap-2 ${location.pathname.includes('/gestao-filas') ? 'text-primary font-medium bg-primary-light/20' : 'text-gray-700'}`}
                 >
                   <Layers size={16} /> Gestão de Filas
                 </button>
-                {location.pathname.startsWith('/contract/') && (
+                {location.pathname.includes('/contract/') && (
                   <button
                     onClick={() => {
                       setIsMenuOpen(false);
@@ -138,10 +143,10 @@ export default function App() {
                 {role === 'ADMIN' && (
                   <button
                     onClick={() => {
-                      navigate('/admin');
+                      navigate(`/${rolePath}/backoffice`);
                       setIsMenuOpen(false);
                     }}
-                    className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors ${location.pathname === '/admin' ? 'text-primary font-medium bg-primary-light/20' : 'text-gray-700'}`}
+                    className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors ${location.pathname.includes('/backoffice') ? 'text-primary font-medium bg-primary-light/20' : 'text-gray-700'}`}
                   >
                     Backoffice
                   </button>
@@ -159,7 +164,7 @@ export default function App() {
 
           <div className="flex items-center gap-4">
             {role === 'ADMIN' && (
-              <button onClick={() => navigate('/admin')} className={`text-sm font-medium px-3 py-1.5 rounded-lg transition-colors ${location.pathname === '/admin' ? 'bg-primary-light text-primary' : 'text-gray-600 hover:bg-gray-100'}`}>
+              <button onClick={() => navigate(`/${rolePath}/backoffice`)} className={`text-sm font-medium px-3 py-1.5 rounded-lg transition-colors ${location.pathname.includes('/backoffice') ? 'bg-primary-light text-primary' : 'text-gray-600 hover:bg-gray-100'}`}>
                 <Settings size={18} className="inline mr-1" /> Backoffice
               </button>
             )}
@@ -168,8 +173,15 @@ export default function App() {
               <select 
                 value={role} 
                 onChange={(e) => {
-                  setRole(e.target.value as Role);
-                  navigate('/dashboard');
+                  const newRole = e.target.value.toLowerCase();
+                  let nextView = pathParts[2] || 'dashboard';
+                  if (nextView === 'backoffice' && newRole !== 'admin') {
+                    nextView = 'dashboard';
+                  }
+                  if (nextView === 'contract') {
+                    nextView = `contract/${pathParts[3]}`;
+                  }
+                  navigate(`/${newRole}/${nextView}`);
                 }}
                 className="bg-transparent border-none text-sm font-medium text-gray-700 focus:ring-0 cursor-pointer py-1 pr-8"
               >
@@ -184,27 +196,27 @@ export default function App() {
       </header>
 
       {/* Main Content */}
-      <main className={`flex-1 p-4 md:p-8 mx-auto w-full ${(location.pathname === '/listagem-geral' || location.pathname === '/gestao-filas') ? 'max-w-[1600px]' : 'max-w-7xl'}`}>
-        {location.pathname.startsWith('/contract/') && (
-          <button onClick={() => navigate('/dashboard')} className="flex items-center gap-1 text-primary font-medium mb-6 hover:underline">
+      <main className={`flex-1 p-4 md:p-8 mx-auto w-full ${(location.pathname.includes('/listagem-geral') || location.pathname.includes('/gestao-filas')) ? 'max-w-[1600px]' : 'max-w-7xl'}`}>
+        {location.pathname.includes('/contract/') && (
+          <button onClick={() => navigate(`/${rolePath}/dashboard`)} className="flex items-center gap-1 text-primary font-medium mb-6 hover:underline">
             <ChevronLeft size={20} /> Voltar ao Dashboard
           </button>
         )}
 
         <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<Navigate to="/cliente/dashboard" replace />} />
           
-          <Route path="/dashboard" element={
+          <Route path="/:urlRole/dashboard" element={
             <Dashboard 
               contracts={contracts} 
               configs={configs}
               role={role} 
-              onSelect={(id) => navigate(`/contract/${id}`)} 
+              onSelect={(id) => navigate(`/${rolePath}/contract/${id}`)} 
               onCreateTicket={handleCreateTicket}
             />
           } />
 
-          <Route path="/contract/:id" element={
+          <Route path="/:urlRole/contract/:id" element={
             <ContractRoute 
               contracts={contracts}
               configs={configs}
@@ -216,7 +228,7 @@ export default function App() {
             />
           } />
 
-          <Route path="/admin" element={
+          <Route path="/:urlRole/backoffice" element={
             role === 'ADMIN' ? (
               <AdminBackoffice 
                 configs={configs} 
@@ -227,16 +239,28 @@ export default function App() {
                 onUpdateTemplate={handleUpdateTemplate}
               />
             ) : (
-              <Navigate to="/dashboard" replace />
+              <Navigate to={`/${rolePath}/dashboard`} replace />
             )
           } />
 
-          <Route path="/listagem-geral" element={<ListagemGeral />} />
-          <Route path="/gestao-filas" element={<GestaoFilas />} />
+          <Route path="/:urlRole/listagem-geral" element={<ListagemGeral />} />
+          <Route path="/:urlRole/gestao-filas" element={<GestaoFilas />} />
+
+          {/* Legacy routes */}
+          <Route path="/dashboard" element={<Navigate to="/cliente/dashboard" replace />} />
+          <Route path="/admin" element={<Navigate to="/admin/backoffice" replace />} />
+          <Route path="/listagem-geral" element={<Navigate to="/cliente/listagem-geral" replace />} />
+          <Route path="/gestao-filas" element={<Navigate to="/cliente/gestao-filas" replace />} />
+          <Route path="/contract/:id" element={<LegacyContractRedirect />} />
         </Routes>
       </main>
     </div>
   );
+}
+
+function LegacyContractRedirect() {
+  const { id } = useParams();
+  return <Navigate to={`/cliente/contract/${id}`} replace />;
 }
 
 // Wrapper component to extract ID from URL and pass to ContractPortal
